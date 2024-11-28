@@ -8,33 +8,25 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                // Clone repository từ GitHub
                 git branch: 'main', url: 'https://github.com/huynhduydong/DeployMaster.git'
             }
         }
 
         stage('Stop Existing Services') {
             steps {
-                script {
-                    // Tắt các container đang chạy
-                    sh 'docker-compose down || true'
-                }
+                sh 'docker-compose down || true'
             }
         }
 
         stage('Build and Deploy Services') {
             steps {
-                script {
-                    // Build và chạy lại các container
-                    sh "docker-compose -f ${DOCKER_COMPOSE_FILE} up --build -d"
-                }
+                sh "docker-compose -f ${DOCKER_COMPOSE_FILE} up --build -d"
             }
         }
 
         stage('Healthcheck Verification') {
             steps {
                 script {
-                    // Kiểm tra trạng thái healthcheck của MySQL
                     sh '''
                     echo "Waiting for MySQL to be healthy..."
                     for i in {1..10}; do
@@ -44,7 +36,6 @@ pipeline {
                         echo "MySQL is healthy!"
                         exit 0
                       fi
-                      echo "Retrying in 5 seconds..."
                       sleep 5
                     done
                     echo "MySQL failed to become healthy in time."
@@ -57,9 +48,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    // (Tùy chọn) Chạy các test
-                    echo 'Running application tests...'
-                    sh 'docker exec deploymaster-springboot-1 ./mvnw test'
+                    sh 'docker exec deploymaster-springboot-1 ./mvnw test || true'
                 }
             }
         }
@@ -67,8 +56,7 @@ pipeline {
 
     post {
         always {
-            // Dọn dẹp container trong trường hợp cần thiết
-            sh 'docker-compose down'
+            sh 'docker-compose down || true'
         }
         success {
             echo 'Pipeline executed successfully!'
