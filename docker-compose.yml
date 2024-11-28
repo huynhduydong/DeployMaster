@@ -14,7 +14,7 @@ services:
 
   backend:
     build:
-      context: ./
+      context: ./lavenShopBackend
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
