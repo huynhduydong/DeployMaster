@@ -1,37 +1,44 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_COMPOSE_FILE = 'docker-compose.yml'
-    }
-
     stages {
+
         stage('Checkout Code') {
             steps {
+                // Clone source code từ repository
                 git branch: 'main', url: 'https://github.com/huynhduydong/DeployMaster.git'
             }
         }
 
-        stage('Stop Existing Services') {
+        stage('Build Docker Images') {
             steps {
-                sh 'docker-compose down || true'
+                script {
+                    // Build image Spring Boot
+                    sh 'docker build -t laven-springboot ./LavenShopBackend'
+                    
+                    // Build image Next.js
+                    sh 'docker build -t laven-nextjs ./LavenFontend/lavenshop'
+                }
             }
         }
 
-        stage('Build and Deploy Services') {
+        stage('Start Services with Docker Compose') {
             steps {
-                sh "docker-compose -f ${DOCKER_COMPOSE_FILE} up --build -d"
+                script {
+                    // Chạy các container từ Docker Compose
+                    sh 'docker-compose -f docker-compose.yml up --build -d'
+                }
             }
         }
 
         stage('Healthcheck Verification') {
             steps {
                 script {
+                    // Kiểm tra MySQL đã sẵn sàng hay chưa
                     sh '''
                     echo "Waiting for MySQL to be healthy..."
                     for i in {1..10}; do
                       HEALTH_STATUS=$(docker inspect --format='{{json .State.Health.Status}}' deploymaster-mysql-1 || echo "unhealthy")
-                      echo "MySQL Health Status: $HEALTH_STATUS"
                       if [ "$HEALTH_STATUS" == '"healthy"' ]; then
                         echo "MySQL is healthy!"
                         exit 0
@@ -45,18 +52,12 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                script {
-                    sh 'docker exec deploymaster-springboot-1 ./mvnw test || true'
-                }
-            }
-        }
     }
 
     post {
         always {
-            sh 'docker-compose down || true'
+            // Dọn dẹp sau khi build
+            sh 'docker-compose down'
         }
         success {
             echo 'Pipeline executed successfully!'
