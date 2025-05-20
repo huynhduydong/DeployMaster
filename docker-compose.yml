@@ -23,6 +23,7 @@ services:
     build:
       context: ./LavenFontend/lavenshop
       dockerfile: Dockerfile
+    command: npm start
     ports:
       - "3000:3000"
 

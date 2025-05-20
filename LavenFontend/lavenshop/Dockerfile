@@ -13,8 +13,11 @@ RUN npm install
 # Copy toàn bộ mã nguồn
 COPY . .
 
+# Build the Next.js application
+RUN npm run build
+
 # Mở cổng 3000 để ứng dụng lắng nghe
 EXPOSE 3000
 
-# Khởi chạy ứng dụng Next.js
-CMD ["npm", "run", "dev"]
+# Start the built Next.js application
+CMD ["npm", "start"]
