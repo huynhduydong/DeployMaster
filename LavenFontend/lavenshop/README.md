@@ -50,13 +50,18 @@ Some of the pictures of this Application
    ```
 2. Navigate to the project directory:
    ```
-   cd LavenShop
+   cd lavenshop
    ```
 3. Install dependencies:
    ```
    npm install
    ```
-4. Build the project:
+4. Start the project in development mode:
    ```
    npm run dev
+   ```
+   For a production build use:
+   ```
+   npm run build
+   npm start
    ```
